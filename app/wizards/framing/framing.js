@@ -25,14 +25,14 @@ var framingWizardTemplate = `
           </div>
 
           <div class="row mb-2">
-            <label class="cell-sm-6">Width<br> <small class="dark">X-Axis (width of left over stock)</small></label>
+            <label class="cell-sm-6">Width<br> <small class="dark">X-Axis (width of leftover stock)</small></label>
             <div class="cell-sm-6">
               <input id="framingX" type="number" data-role="input" data-append="mm" data-clear-button="false" value="200" data-editable="true">
             </div>
           </div>
 
           <div class="row mb-2 border-bottom bd-gray">
-            <label class="cell-sm-6">Length<br> <small class="dark">Y-Axis (length of left over stock)</small></label>
+            <label class="cell-sm-6">Length<br> <small class="dark">Y-Axis (length of leftover stock)</small></label>
             <div class="cell-sm-6">
               <input id="framingY" type="number" data-role="input" data-append="mm" data-clear-button="false" value="300" data-editable="true">
             </div>
@@ -61,14 +61,20 @@ var framingWizardTemplate = `
               </select>
             </div>
           </div>
-
         </div>
         <div class="cell-sm-5">
           <small class="dark">You can use the Framing Wizard to
             <ul class="dark">
               <li>Frame your stock</li>
               <li>Clean up sides</li>
-            </ul></small>
+            </ul>
+          </small>
+          <!-- maybe add a preview image here
+          <hr>
+          <center>
+            <img src="img/framing/wizard1.png" alt="diameter" border="0" style="max-width: calc(100% - 10px); ">
+          </center>
+          -->
         </div>
       </div>
     </form>`
