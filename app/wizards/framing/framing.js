@@ -191,10 +191,10 @@ function createFramingGcode() {
     console.log(JSON.stringify(data));
     localStorage.setItem("lastFramingTool", JSON.stringify(data));
 
-    var startpointX = 0 - data.framingDiameter;
+    var startpointX = 0 - (data.framingDiameter / 2);
     var endpointX = data.framingX + data.framingDiameter;
 
-    var startpointY = 0 - data.framingDiameter;
+    var startpointY = 0 - (data.framingDiameter / 2);
     var endpointY = data.framingY + data.framingDiameter;
 
     var gcode =
@@ -221,11 +221,12 @@ M3 S` + data.framingRPM + `; Spindle On
         gcode += `M8; Coolant On\n`
     }
 
-    gcode += `G4 P1.8; Wait for spindle to come up to speed
-G1 Z10; Move to Safe Height
-G0 X0 Y0; Move to origin position
-G1 F` +
-        data.framingFeedrate + `; Set feedrate\n\n`;
+    gcode += `
+    G4 P1.8; Wait for spindle to come up to speed
+    G1 F` + data.framingFeedrate + `; Set feedrate
+    G1 Z10; Move to Safe Height
+    G0 X0 Y0; Move to origin position
+    `;
 
     //gcode += `G0 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to framing start point\n\n`;
 
