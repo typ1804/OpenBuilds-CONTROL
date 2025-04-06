@@ -222,10 +222,10 @@ M3 S` + data.framingRPM + `; Spindle On
     }
 
     gcode += `
-    G4 P1.8; Wait for spindle to come up to speed
-    G1 F` + data.framingFeedrate + `; Set feedrate
-    G1 Z10; Move to Safe Height
-    G0 X0 Y0; Move to origin position
+G4 P1.8; Wait for spindle to come up to speed
+G1 F` + data.framingFeedrate + `; Set feedrate
+G1 Z10; Move to Safe Height
+G0 X0 Y0; Move to origin position
     `;
 
     //gcode += `G0 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to framing start point\n\n`;
