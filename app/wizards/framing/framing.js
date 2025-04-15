@@ -53,19 +53,33 @@ var framingWizardTemplate = `
                 <option value="topBottom">Along top and bottom side only</option>
              </select>
            </div>
-         </div>
+          </div>
 
           <div class="row mb-2">
-            <label class="cell-sm-6">Cut Depth per Pass</label>
+            <label class="cell-sm-6">Cut Depth per Pass (Axial, End of Tool)</label>
             <div class="cell-sm-6">
-              <input id="framingDepth" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
+              <input id="framingDepthAxialEndOfTool" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
             </div>
           </div>
 
           <div class="row mb-2 pb-2 border-bottom bd-gray">
             <label class="cell-sm-6  mb-2">Final Cut Depth</label>
             <div class="cell-sm-6">
-              <input id="framingFinalDepth" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
+              <input id="framingFinalDepthAxialEndOfTool" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
+            </div>
+          </div>
+          
+          <div class="row mb-2">
+            <label class="cell-sm-6">Cut Depth per Pass (Radial, Side of Tool)</label>
+            <div class="cell-sm-6">
+              <input id="framingDepthRadialSideOfTool" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
+            </div>
+          </div>
+
+          <div class="row mb-2 pb-2 border-bottom bd-gray">
+            <label class="cell-sm-6  mb-2">Final Cut Depth</label>
+            <div class="cell-sm-6">
+              <input id="framingFinalDepthRadialSideOfTool" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
             </div>
           </div>
 
@@ -137,8 +151,10 @@ function populateFramingToolForm() {
             framingFeedrate: 800,
             framingX: 200,
             framingY: 300,
-            framingDepth: 3,
-            framingFinalDepth: 3,
+            framingDepthAxialEndOfTool: 3,
+            framingFinalDepthAxialEndOfTool: 3,
+            framingDepthRadialSideOfTool: 3,
+            framingFinalDepthRadialSideOfTool: 3,
             framingCoolant: "enabled",
             framingRPM: 1000,
             framingSides: "all"
@@ -151,11 +167,17 @@ function populateFramingToolForm() {
     $("#framingFeedrate").val(data.framingFeedrate);
     $("#framingX").val(data.framingX);
     $("#framingY").val(data.framingY);
-    $("#framingDepth").val(data.framingDepth);
-    if (data.framingFinalDepth !== undefined) {
-        $("#framingFinalDepth").val(data.framingFinalDepth);
+    $("#framingDepthAxialEndOfTool").val(data.framingDepthAxialEndOfTool);
+    if (data.framingFinalDepthAxialEndOfTool !== undefined) {
+        $("#framingFinalDepthAxialEndOfTool").val(data.framingFinalDepthAxialEndOfTool);
     } else {
-        $("#framingFinalDepth").val(data.framingDepth);
+        $("#framingFinalDepthAxialEndOfTool").val(data.framingDepthAxialEndOfTool);
+    }
+    $("#framingDepthRadialSideOfTool").val(data.framingDepthRadialSideOfTool);
+    if (data.framingFinalDepthRadialSideOfTool !== undefined) {
+        $("#framingFinalDepthRadialSideOfTool").val(data.framingFinalDepthRadialSideOfTool);
+    } else {
+        $("#framingFinalDepthRadialSideOfTool").val(data.framingDepthRadialSideOfTool);
     }
     if (data.framingCoolant !== undefined) {
         $('#framingCoolant').val(data.framingCoolant)
@@ -172,18 +194,28 @@ function createFramingGcode() {
         framingFeedrate: parseFloat($("#framingFeedrate").val()),
         framingX: parseFloat($("#framingX").val()),
         framingY: parseFloat($("#framingY").val()),
-        framingDepth: parseFloat($("#framingDepth").val()),
-        framingFinalDepth: parseFloat($("#framingFinalDepth").val()),
+        framingDepthAxialEndOfTool: parseFloat($("#framingDepthAxialEndOfTool").val()),
+        framingFinalDepthAxialEndOfTool: parseFloat($("#framingFinalDepthAxialEndOfTool").val()),
+        framingDepthRadialSideOfTool: parseFloat($("#framingDepthRadialSideOfTool").val()),
+        framingFinalDepthRadialSideOfTool: parseFloat($("#framingFinalDepthRadialSideOfTool").val()),
         framingRPM: parseFloat($('#framingRPM').val()),
         framingCoolant: $('#framingCoolant').val(),
-        framingSides: $('#framingSides').val()
+        framingSides: $('#framingSides').val(),
+        framingSafeZHeight: 10
     };
 
-    if (data.framingFinalDepth > data.framingDepth) {
-        console.log("multipass")
-    } else if (data.framingFinalDepth === data.framingDepth || data.framingFinalDepth < data.framingDepth) {
-        console.log("singlepass")
-        data.framingFinalDepth = data.framingDepth
+    if (data.framingFinalDepthAxialEndOfTool > data.framingDepthAxialEndOfTool) {
+        console.log("multipass AxialEndOfTool")
+    } else if (data.framingFinalDepthAxialEndOfTool === data.framingDepthAxialEndOfTool || data.framingFinalDepthAxialEndOfTool < data.framingDepthAxialEndOfTool) {
+        console.log("singlepass AxialEndOfTool")
+        data.framingFinalDepthAxialEndOfTool = data.framingDepthAxialEndOfTool
+    }
+
+    if (data.framingFinalDepthRadialSideOfTool > data.framingDepthRadialSideOfTool) {
+        console.log("multipass RadialSideOfTool")
+    } else if (data.framingFinalDepthRadialSideOfTool === data.framingDepthRadialSideOfTool || data.framingFinalDepthRadialSideOfTool < data.framingDepthRadialSideOfTool) {
+        console.log("singlepass RadialSideOfTool")
+        data.framingFinalDepthRadialSideOfTool = data.framingDepthRadialSideOfTool
     }
 
     console.log('store config');
@@ -210,7 +242,7 @@ function createFramingGcode() {
         `, Y: ` +
         data.framingY +
         `, Z: ` +
-        data.framingDepth +
+        data.framingDepthAxialEndOfTool +
         `
 G54; Work Coordinates
 G21; mm-mode
@@ -224,81 +256,84 @@ M3 S` + data.framingRPM + `; Spindle On
     gcode += `
 G4 P1.8; Wait for spindle to come up to speed
 G1 F` + data.framingFeedrate + `; Set feedrate
-G1 Z10; Move to Safe Height
+G1 Z${data.framingSafeZHeight}; Move to Safe Height
 G0 X0 Y0; Move to origin position
-    `;
+`;
 
     //gcode += `G0 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to framing start point\n\n`;
 
     // MULTIPASS
-    var counter = 1;
-    for (q = data.framingDepth; q < data.framingFinalDepth + data.framingDepth; q += data.framingDepth) {
-        gcode += `; start of round ` + counter + `\n`;
+    var radialCounter = 1;
 
-        if (q > data.framingFinalDepth) {
-            var zval = -data.framingFinalDepth;
-        } else {
-            var zval = -q
-        }
-        console.log(q, zval)
-
-        if (data.framingSides === "all" || data.framingSides === "left" || data.framingSides === "leftRight") {
-            gcode += `G1 Z10; lifting to Z safe height\n`;
-            gcode += `G1 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to left side\n`;
-
-            // cut along left side
-            gcode += `G1 Z` + zval + `; plunge to depth for this round\n`;
-            gcode += `G1 X` + startpointX.toFixed(4) + ` Y` + endpointY.toFixed(4) + `; cut left side\n`;
-
-            if (data.framingSides === "leftRight") {
-                gcode += `G1 Z10; lifting to Z safe height\n`;
-                gcode += `G1 X` + endpointX.toFixed(4) + ` Y` + endpointY.toFixed(4) + `; move to right side\n`;
-            }
+    for (
+        let radialStep = data.framingDepthRadialSideOfTool;
+        radialStep <= data.framingFinalDepthRadialSideOfTool;
+        radialStep += data.framingDepthRadialSideOfTool
+    ) {
+        // Limit radialStep not to exceed the target
+        if (radialStep > data.framingFinalDepthRadialSideOfTool) {
+            radialStep = data.framingFinalDepthRadialSideOfTool;
         }
 
-        if (data.framingSides === "all" || data.framingSides === "top" || data.framingSides === "topBottom") {
-            if (data.framingSides === "top" || data.framingSides === "topBottom") {
-                gcode += `G1 Z10; lifting to Z safe height\n`;
-                gcode += `G1 X` + startpointX.toFixed(4) + ` Y` + endpointY.toFixed(4) + `; move to top side\n`;
+        let offset = (data.framingDiameter * 1.5) - radialStep;
+        let startpointX = 0 - offset;
+        let endpointX = data.framingX + offset;
+        let startpointY = 0 - offset;
+        let endpointY = data.framingY + offset;
+
+        let axialCounter = 1;
+        for (
+            let axialStep = data.framingDepthAxialEndOfTool;
+            axialStep <= data.framingFinalDepthAxialEndOfTool;
+            axialStep += data.framingDepthAxialEndOfTool
+        ) {
+            let zval = -Math.min(axialStep, data.framingFinalDepthAxialEndOfTool);
+
+            gcode += `; Radial-Pass ${radialCounter}, Axial-Pass ${axialCounter}\n`;
+
+            if (data.framingSides === "all" || data.framingSides === "left" || data.framingSides === "leftRight") {
+                gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${startpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                gcode += `G1 Z${zval.toFixed(4)}\nG1 X${startpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+
+                if (data.framingSides === "leftRight") {
+                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                }
             }
 
-            // cut along top side
-            gcode += `G1 Z` + zval + `; plunge to depth for this round\n`;
-            gcode += `G1 X` + endpointX.toFixed(4) + ` Y` + endpointY.toFixed(4) + `; cut top side\n`;
+            if (data.framingSides === "all" || data.framingSides === "top" || data.framingSides === "topBottom") {
+                if (data.framingSides === "top" || data.framingSides === "topBottom") {
+                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${startpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                }
+                gcode += `G1 Z${zval.toFixed(4)}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
 
-            if (data.framingSides === "topBottom") {
-                gcode += `G1 Z10; lifting to Z safe height\n`;
-                gcode += `G1 X` + endpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; cut bottom side\n`;
+                if (data.framingSides === "topBottom") {
+                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                }
             }
+
+            if (data.framingSides === "all" || data.framingSides === "right" || data.framingSides === "leftRight") {
+                if (data.framingSides === "right" || data.framingSides === "leftRight") {
+                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                }
+                gcode += `G1 Z${zval.toFixed(4)}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+            }
+
+            if (data.framingSides === "all" || data.framingSides === "bottom" || data.framingSides === "topBottom") {
+                if (data.framingSides === "bottom" || data.framingSides === "topBottom") {
+                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                }
+                gcode += `G1 Z${zval.toFixed(4)}\nG1 X${startpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+            }
+
+            axialCounter++;
         }
 
-        if (data.framingSides === "all" || data.framingSides === "right" || data.framingSides === "leftRight") {
-            if (data.framingSides === "right" || data.framingSides === "leftRight") {
-                gcode += `G1 Z10; lifting to Z safe height\n`;
-                gcode += `G1 X` + endpointX.toFixed(4) + ` Y` + endpointY.toFixed(4) + `; move to top right side\n`;
-            }
-
-            // cut along right side
-            gcode += `G1 Z` + zval + `; plunge to depth for this round\n`;
-            gcode += `G1 X` + endpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; cut right side\n`;
-        }
-
-        if (data.framingSides === "all" || data.framingSides === "bottom" || data.framingSides === "topBottom") {
-            if (data.framingSides === "bottom" || data.framingSides === "topBottom") {
-                gcode += `G1 Z10; lifting to Z safe height\n`;
-                gcode += `G1 X` + endpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to bottom right side\n`;
-            }
-
-            // cut along bottom side
-            gcode += `G1 Z` + zval + `; plunge to depth for this round\n`;
-            gcode += `G1 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; cut bottom side\n`;
-        }
-
-        counter++;
+        radialCounter++;
     }
+
     // END MULTIPASS
 
-    gcode += `G1 Z10; pass complete, lifting to Z safe height\n\n`;
+    gcode += `G1 Z${data.framingSafeZHeight}; pass complete, lifting to Z safe height\n\n`;
     gcode += `G0 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to framing start point\n`;
     gcode += `M5 S0; Spindle Off\n`;
 
