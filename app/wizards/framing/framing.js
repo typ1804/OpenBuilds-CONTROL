@@ -256,7 +256,7 @@ M3 S` + data.framingRPM + `; Spindle On
     gcode += `
 G4 P1.8; Wait for spindle to come up to speed
 G1 F` + data.framingFeedrate + `; Set feedrate
-G1 Z${data.framingSafeZHeight}; Move to Safe Height
+G0 Z${data.framingSafeZHeight}; Move to Safe Height
 G0 X0 Y0; Move to origin position
 `;
 
@@ -292,37 +292,37 @@ G0 X0 Y0; Move to origin position
             gcode += `; Radial-Pass ${radialCounter}, Axial-Pass ${axialCounter}\n`;
 
             if (data.framingSides === "all" || data.framingSides === "left" || data.framingSides === "leftRight") {
-                gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${startpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
-                gcode += `G1 Z${zval.toFixed(4)}\nG1 X${startpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${startpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                gcode += `G0 Z${zval.toFixed(4)}\nG1 X${startpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
 
                 if (data.framingSides === "leftRight") {
-                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                    gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
                 }
             }
 
             if (data.framingSides === "all" || data.framingSides === "top" || data.framingSides === "topBottom") {
                 if (data.framingSides === "top" || data.framingSides === "topBottom") {
-                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${startpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                    gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${startpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
                 }
-                gcode += `G1 Z${zval.toFixed(4)}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                gcode += `G0 Z${zval.toFixed(4)}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
 
                 if (data.framingSides === "topBottom") {
-                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                    gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
                 }
             }
 
             if (data.framingSides === "all" || data.framingSides === "right" || data.framingSides === "leftRight") {
                 if (data.framingSides === "right" || data.framingSides === "leftRight") {
-                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                    gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
                 }
-                gcode += `G1 Z${zval.toFixed(4)}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                gcode += `G0 Z${zval.toFixed(4)}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
             }
 
             if (data.framingSides === "all" || data.framingSides === "bottom" || data.framingSides === "topBottom") {
                 if (data.framingSides === "bottom" || data.framingSides === "topBottom") {
-                    gcode += `G1 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                    gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
                 }
-                gcode += `G1 Z${zval.toFixed(4)}\nG1 X${startpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                gcode += `G0 Z${zval.toFixed(4)}\nG1 X${startpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
             }
 
             axialCounter++;
@@ -333,7 +333,7 @@ G0 X0 Y0; Move to origin position
 
     // END MULTIPASS
 
-    gcode += `G1 Z${data.framingSafeZHeight}; pass complete, lifting to Z safe height\n\n`;
+    gcode += `G0 Z${data.framingSafeZHeight}; pass complete, lifting to Z safe height\n\n`;
     gcode += `G0 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to framing start point\n`;
     gcode += `M5 S0; Spindle Off\n`;
 
