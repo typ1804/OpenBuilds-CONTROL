@@ -69,17 +69,10 @@ var framingWizardTemplate = `
             </div>
           </div>
           
-          <div class="row mb-2">
+          <div class="row mb-2 border-bottom bd-gray">
             <label class="cell-sm-6">Cut Depth per Pass (Radial, Side of Tool)</label>
             <div class="cell-sm-6">
               <input id="framingDepthRadialSideOfTool" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
-            </div>
-          </div>
-
-          <div class="row mb-2 pb-2 border-bottom bd-gray">
-            <label class="cell-sm-6  mb-2">Final Cut Depth</label>
-            <div class="cell-sm-6">
-              <input id="framingFinalDepthRadialSideOfTool" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
             </div>
           </div>
 
@@ -154,7 +147,6 @@ function populateFramingToolForm() {
             framingDepthAxialEndOfTool: 3,
             framingFinalDepthAxialEndOfTool: 3,
             framingDepthRadialSideOfTool: 3,
-            framingFinalDepthRadialSideOfTool: 3,
             framingCoolant: "enabled",
             framingRPM: 1000,
             framingSides: "all"
@@ -174,11 +166,6 @@ function populateFramingToolForm() {
         $("#framingFinalDepthAxialEndOfTool").val(data.framingDepthAxialEndOfTool);
     }
     $("#framingDepthRadialSideOfTool").val(data.framingDepthRadialSideOfTool);
-    if (data.framingFinalDepthRadialSideOfTool !== undefined) {
-        $("#framingFinalDepthRadialSideOfTool").val(data.framingFinalDepthRadialSideOfTool);
-    } else {
-        $("#framingFinalDepthRadialSideOfTool").val(data.framingDepthRadialSideOfTool);
-    }
     if (data.framingCoolant !== undefined) {
         $('#framingCoolant').val(data.framingCoolant)
     }
@@ -197,7 +184,6 @@ function createFramingGcode() {
         framingDepthAxialEndOfTool: parseFloat($("#framingDepthAxialEndOfTool").val()),
         framingFinalDepthAxialEndOfTool: parseFloat($("#framingFinalDepthAxialEndOfTool").val()),
         framingDepthRadialSideOfTool: parseFloat($("#framingDepthRadialSideOfTool").val()),
-        framingFinalDepthRadialSideOfTool: parseFloat($("#framingFinalDepthRadialSideOfTool").val()),
         framingRPM: parseFloat($('#framingRPM').val()),
         framingCoolant: $('#framingCoolant').val(),
         framingSides: $('#framingSides').val(),
@@ -211,11 +197,8 @@ function createFramingGcode() {
         data.framingFinalDepthAxialEndOfTool = data.framingDepthAxialEndOfTool
     }
 
-    if (data.framingFinalDepthRadialSideOfTool > data.framingDepthRadialSideOfTool) {
-        console.log("multipass RadialSideOfTool")
-    } else if (data.framingFinalDepthRadialSideOfTool === data.framingDepthRadialSideOfTool || data.framingFinalDepthRadialSideOfTool < data.framingDepthRadialSideOfTool) {
-        console.log("singlepass RadialSideOfTool")
-        data.framingFinalDepthRadialSideOfTool = data.framingDepthRadialSideOfTool
+    if (data.framingDepthRadialSideOfTool > data.framingDiameter) {
+        data.framingDepthRadialSideOfTool = data.framingDiameter
     }
 
     console.log('store config');
@@ -223,10 +206,10 @@ function createFramingGcode() {
     console.log(JSON.stringify(data));
     localStorage.setItem("lastFramingTool", JSON.stringify(data));
 
-    var startpointX = 0 - (data.framingDiameter / 2);
+    var startpointX = 0 - data.framingDiameter;
     var endpointX = data.framingX + data.framingDiameter;
 
-    var startpointY = 0 - (data.framingDiameter / 2);
+    var startpointY = 0 - data.framingDiameter;
     var endpointY = data.framingY + data.framingDiameter;
 
     var gcode =
@@ -267,19 +250,14 @@ G0 X0 Y0; Move to origin position
 
     for (
         let radialStep = data.framingDepthRadialSideOfTool;
-        radialStep <= data.framingFinalDepthRadialSideOfTool;
+        radialStep <= data.framingDiameter;
         radialStep += data.framingDepthRadialSideOfTool
     ) {
-        // Limit radialStep not to exceed the target
-        if (radialStep > data.framingFinalDepthRadialSideOfTool) {
-            radialStep = data.framingFinalDepthRadialSideOfTool;
-        }
-
-        let offset = (data.framingDiameter * 1.5) - radialStep;
-        let startpointX = 0 - offset;
-        let endpointX = data.framingX + offset;
-        let startpointY = 0 - offset;
-        let endpointY = data.framingY + offset;
+        let offset =  data.framingDiameter - Math.min(radialStep, data.framingDiameter);
+        let startpointX = -data.framingDiameter - offset;
+        let endpointX = data.framingX + data.framingDiameter + offset;
+        let startpointY = -data.framingDiameter - offset;
+        let endpointY = data.framingY + data.framingDiameter + offset;
 
         let axialCounter = 1;
         for (
@@ -334,7 +312,7 @@ G0 X0 Y0; Move to origin position
     // END MULTIPASS
 
     gcode += `G0 Z${data.framingSafeZHeight}; pass complete, lifting to Z safe height\n\n`;
-    gcode += `G0 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to framing start point\n`;
+    //gcode += `G0 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to framing start point\n`;
     gcode += `M5 S0; Spindle Off\n`;
 
     if (data.framingCoolant === "enabled") {
