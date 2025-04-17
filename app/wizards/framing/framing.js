@@ -243,8 +243,6 @@ G0 Z${data.framingSafeZHeight}; Move to Safe Height
 G0 X0 Y0; Move to origin position
 `;
 
-    //gcode += `G0 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to framing start point\n\n`;
-
     // MULTIPASS
     var radialCounter = 1;
 
