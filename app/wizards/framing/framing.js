@@ -69,10 +69,17 @@ var framingWizardTemplate = `
             </div>
           </div>
           
-          <div class="row mb-2 border-bottom bd-gray">
+          <div class="row mb-2">
             <label class="cell-sm-6">Cut Depth per Pass (Radial, Side of Tool)</label>
             <div class="cell-sm-6">
               <input id="framingDepthRadialSideOfTool" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
+            </div>
+          </div>
+
+          <div class="row mb-2 pb-2 border-bottom bd-gray">
+            <label class="cell-sm-6  mb-2">Number of Cuts</label>
+            <div class="cell-sm-6">
+              <input id="framingNumberOfCutsRadialSideOfTool" type="number" data-role="input" data-append="mm" data-clear-button="false" value="2" data-editable="true">
             </div>
           </div>
 
@@ -147,6 +154,7 @@ function populateFramingToolForm() {
             framingDepthAxialEndOfTool: 3,
             framingFinalDepthAxialEndOfTool: 3,
             framingDepthRadialSideOfTool: 3,
+            framingNumberOfCutsRadialSideOfTool: 1,
             framingCoolant: "enabled",
             framingRPM: 1000,
             framingSides: "all"
@@ -184,6 +192,7 @@ function createFramingGcode() {
         framingDepthAxialEndOfTool: parseFloat($("#framingDepthAxialEndOfTool").val()),
         framingFinalDepthAxialEndOfTool: parseFloat($("#framingFinalDepthAxialEndOfTool").val()),
         framingDepthRadialSideOfTool: parseFloat($("#framingDepthRadialSideOfTool").val()),
+        framingNumberOfCutsRadialSideOfTool: parseFloat($("#framingNumberOfCutsRadialSideOfTool").val()),
         framingRPM: parseFloat($('#framingRPM').val()),
         framingCoolant: $('#framingCoolant').val(),
         framingSides: $('#framingSides').val(),
@@ -243,15 +252,15 @@ G0 Z${data.framingSafeZHeight}; Move to Safe Height
 G0 X0 Y0; Move to origin position
 `;
 
-    // MULTIPASS
     var radialCounter = 1;
-
     for (
         let radialStep = data.framingDepthRadialSideOfTool;
-        radialStep <= data.framingDiameter;
-        radialStep += data.framingDepthRadialSideOfTool
+        radialStep >= 0;
+        radialStep -= data.framingDepthRadialSideOfTool
     ) {
-        let offset =  data.framingDiameter - Math.min(radialStep, data.framingDiameter);
+        console.log(radialStep)
+
+        let offset = radialStep;
         let startpointX = -data.framingDiameter - offset;
         let endpointX = data.framingX + data.framingDiameter + offset;
         let startpointY = -data.framingDiameter - offset;
@@ -260,7 +269,7 @@ G0 X0 Y0; Move to origin position
         let axialCounter = 1;
         for (
             let axialStep = data.framingDepthAxialEndOfTool;
-            axialStep <= data.framingFinalDepthAxialEndOfTool;
+            axialStep < data.framingFinalDepthAxialEndOfTool + data.framingDepthAxialEndOfTool;
             axialStep += data.framingDepthAxialEndOfTool
         ) {
             let zval = -Math.min(axialStep, data.framingFinalDepthAxialEndOfTool);
@@ -268,7 +277,7 @@ G0 X0 Y0; Move to origin position
             gcode += `; Radial-Pass ${radialCounter}, Axial-Pass ${axialCounter}\n`;
 
             if (data.framingSides === "all" || data.framingSides === "left" || data.framingSides === "leftRight") {
-                gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${startpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                gcode += `G0 Z${data.framingSafeZHeight}\nG0 X${startpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
                 gcode += `G0 Z${zval.toFixed(4)}\nG1 X${startpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
 
                 if (data.framingSides === "leftRight") {
@@ -278,25 +287,25 @@ G0 X0 Y0; Move to origin position
 
             if (data.framingSides === "all" || data.framingSides === "top" || data.framingSides === "topBottom") {
                 if (data.framingSides === "top" || data.framingSides === "topBottom") {
-                    gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${startpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                    gcode += `G0 Z${data.framingSafeZHeight}\nG0 X${startpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
                 }
                 gcode += `G0 Z${zval.toFixed(4)}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
 
                 if (data.framingSides === "topBottom") {
-                    gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                    gcode += `G0 Z${data.framingSafeZHeight}\nG0 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
                 }
             }
 
             if (data.framingSides === "all" || data.framingSides === "right" || data.framingSides === "leftRight") {
                 if (data.framingSides === "right" || data.framingSides === "leftRight") {
-                    gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
+                    gcode += `G0 Z${data.framingSafeZHeight}\nG0 X${endpointX.toFixed(4)} Y${endpointY.toFixed(4)}\n`;
                 }
                 gcode += `G0 Z${zval.toFixed(4)}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
             }
 
             if (data.framingSides === "all" || data.framingSides === "bottom" || data.framingSides === "topBottom") {
                 if (data.framingSides === "bottom" || data.framingSides === "topBottom") {
-                    gcode += `G0 Z${data.framingSafeZHeight}\nG1 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
+                    gcode += `G0 Z${data.framingSafeZHeight}\nG0 X${endpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
                 }
                 gcode += `G0 Z${zval.toFixed(4)}\nG1 X${startpointX.toFixed(4)} Y${startpointY.toFixed(4)}\n`;
             }
@@ -306,8 +315,6 @@ G0 X0 Y0; Move to origin position
 
         radialCounter++;
     }
-
-    // END MULTIPASS
 
     gcode += `G0 Z${data.framingSafeZHeight}; pass complete, lifting to Z safe height\n\n`;
     //gcode += `G0 X` + startpointX.toFixed(4) + ` Y` + startpointY.toFixed(4) + `; move to framing start point\n`;
