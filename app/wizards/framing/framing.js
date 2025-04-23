@@ -254,7 +254,7 @@ G0 X0 Y0; Move to origin position
 
     var radialCounter = 1;
     for (
-        let radialStep = data.framingDepthRadialSideOfTool;
+        let radialStep = (data.framingNumberOfCutsRadialSideOfTool * data.framingDepthRadialSideOfTool) - data.framingDepthRadialSideOfTool;
         radialStep >= 0;
         radialStep -= data.framingDepthRadialSideOfTool
     ) {
